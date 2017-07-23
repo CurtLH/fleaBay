@@ -5,6 +5,7 @@ import click
 from ebaysdk.finding import Connection as Finding
 from ebaysdk.exception import ConnectionError
 import psycopg2
+from bs4 import BeautifulSoup
 import json
 import collections
 import pandas as pd
@@ -14,6 +15,7 @@ from datetime import datetime
 import urllib2
 from time import sleep
 from random import random
+import re
 
 
 # enable logging
@@ -35,13 +37,17 @@ def convert_html(raw_html):
 
     # iterate through raw html data
     for line in raw_html:
-        soup = BeautifulSoup(open(line), "lxml")
+        soup = BeautifulSoup(line['read'], "lxml")
     
-        attr = {}
-        attr['itemId'] = line.replace(".html", "")
-    
+        attr = {}   
+
+        attr['url'] =  line['url']
+        attr['code'] = line['code']
+        attr['scrape_date'] = line['scrape_date']
+        attr['itemId'] = line['itemId']    
+        
         table = soup.find('div', 'itemAttr')
-    
+
         try:
             for label in table.select('th, td.attrLabels'):
                 key = re.sub(r'\W+', '', label.text.strip())
