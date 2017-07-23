@@ -6,7 +6,9 @@ from ebaysdk.finding import Connection as Finding
 from ebaysdk.exception import ConnectionError
 import psycopg2
 import json
+import collections
 import pandas as pd
+import numpy as np
 from sqlalchemy import create_engine
 from datetime import datetime
 import urllib2
@@ -23,7 +25,9 @@ logger.setLevel(logging.INFO)
 
 def flatten(d, parent_key='', sep='_'):
 
-    """Thanks to Stackoverflow #6027558"""
+    """
+    Thanks to Stackoverflow #6027558
+    """
 
     items = []
     for k, v in d.items():
@@ -36,9 +40,12 @@ def flatten(d, parent_key='', sep='_'):
     return dict(items)
 
 
-# convert nested dict to unnested dict
 def convert_api_dict(api_data):
 
+
+    """
+    convert nested dict to unnested dict
+    """
 
     # flatten nested dicts
     api_data_flat = []
@@ -84,6 +91,10 @@ def convert_api_dict(api_data):
 
 
 def clean_up_api_df(df):
+
+    """
+    convert value types where appropriate
+    """
 
     # convert itemId to numberic
     df['itemId'] = pd.to_numeric(df['itemId'])
@@ -136,20 +147,24 @@ def cli():
     # get all data from the eBay API
     cur.execute("""SELECT ad FROM ebay_api_raw""")
     api_data = [record[0] for record in cur]
-    logger("Number of records from API: {}".format(len(api_data)))
+    logger.info("Number of records from API: {}".format(len(api_data)))
 
     # convert nested dict to unnested dict
     data = convert_api_dict(api_data)
+    logger.info("Nested dict converted to unnested dict")
 
     # load data into df
     api_df = pd.DataFrame(data)
+    logger.info("Data loaded into dataframe")
 
     # normalize the api data
-    api_df= clean_up_api_df(df):
+    api_df = clean_up_api_df(api_df)
+    logger.info("Data normalized")
 
     # create a connection to write df to database
     engine = create_engine('postgresql://postgres:apassword@localhost:5432/postgres')
     api_df.to_sql(name='ebay_api', con=engine, if_exists = 'replace', chunksize=2500, index=False)    
+    logger.info("Data loaded into database")
 
 
 if __name__ == "__main__":
