@@ -19,7 +19,6 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-##### HELPER FUNCTIONS #####
 
 def collect_api_data(cur):
 
@@ -93,6 +92,7 @@ def scrape_item_attr(cur, items):
         sleep(random() * 5.0)
 
     logger.info("Number of new records inserted: {}".format(cnt))
+
 
 ##### MAIN PROGRAM #####
 @click.command()
