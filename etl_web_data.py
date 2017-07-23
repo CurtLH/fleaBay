@@ -24,6 +24,38 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
+def convert_html(raw_html):
+
+    """
+    converts a list of beautiful soup html objects to list of dicts
+    """
+
+    # create an empty list to hold converted data
+    item_attr = []
+
+    # iterate through raw html data
+    for line in raw_html:
+        soup = BeautifulSoup(open(line), "lxml")
+    
+        attr = {}
+        attr['itemId'] = line.replace(".html", "")
+    
+        table = soup.find('div', 'itemAttr')
+    
+        try:
+            for label in table.select('th, td.attrLabels'):
+                key = re.sub(r'\W+', '', label.text.strip())
+                value = label.find_next_sibling().text.strip()
+                attr[str(key)] = value.encode('utf-8')
+
+            item_attr.append(attr)
+        
+        except:
+            pass
+  
+    return item_attr
+
+
 def convert_data_types(df):
 
     """
@@ -37,6 +69,7 @@ def convert_data_types(df):
     df['SubModel'] = df['SubModel'].replace(np.nan, "N/A")
 
     return df
+
 
 def trans_type(row):
 
@@ -55,8 +88,6 @@ def trans_type(row):
     
     else:
         return 'other'
-    
-df['TRANS'] = df.apply(lambda row: trans_type(row), axis=1)
 
 
 def ext_color(row):
@@ -69,8 +100,6 @@ def ext_color(row):
         return 'other'
     else:
         return row['ExteriorColor'].lower().replace(' ', '_')
-
-df['EXT_COLOR'] = df.apply(lambda row: ext_color(row), axis=1)
 
 
 def vehicle_title(row):
@@ -97,9 +126,8 @@ def vehicle_title(row):
     else:
         'other'
     
-df['TITLE'] = df.apply(lambda row: vehicle_title(row), axis=1)
 
-def vehicle_title(row):
+def num_cyl(row):
 
     """
     simplify number of cylinders
@@ -118,37 +146,6 @@ def vehicle_title(row):
     if '8' in row['NumberofCylinders']:
         return '8'
     
-df['CYL'] = df.apply(lambda row: vehicle_title(row), axis=1)
-
-
-# create an dict with all models and their rank
-models = {'Other': 0,
-          'LE'   : 1,
-          'LT'   : 2,
-          'LS'   : 3,
-          'RS'   : 4,
-          'SS'   : 5,
-          'ZL1'  : 6,
-          'Zl1'  : 6,
-          'zl1'  : 6,
-          'ZL-1' : 6,
-          'zl-1' : 6,
-          'Z/28' : 7,
-          'Z28'  : 7,
-          'COPO' : 8,
-          'Copo' : 8,
-          'copo' : 8}
-
-labels = {0 : 'Other',
-          1 : 'LE',
-          2 : 'LT',
-          3 : 'LS',
-          4 : 'RS',
-          5 : 'SS',
-          6 : 'ZL1',
-          7 : 'Z/28',
-          8 : 'COPO'}
-
 
 def trim_level(row):
 
@@ -203,10 +200,6 @@ def trim_level(row):
     
     return labels[max_model]
 
-df['TRIM'] = df.apply(lambda row: trim_level(row), axis=1)
-
-
-
 
 @click.command()
 def cli():
@@ -230,7 +223,48 @@ def cli():
         logger.info("Unable to connect to the database")
 
 
+    # get all data from the eBay API
+    cur.execute("""SELECT ad FROM ebay_web_raw""")
+    web_html = [record[0] for record in cur]
+    logger.info("Number of records from web: {}".format(len(web_html)))
+
+    # convert HTML to list of dicts
+    web_data = convert_html(web_html)
+    logger.info("HTML data converted")
+
+    # convert to dataframe
+    web_df = pd.DataFrame(web_data)
+    logger.info("Data loaded into DataFrame")
+
+    # convert data types where appropriate
+    web_df = convert_data_types(web_df) 
+    logger.info("Converted data types")
+
+    # simplify transmission type
+    web_df['TRANS'] = web_df.apply(lambda row: trans_type(row), axis=1)
+    logger.info("Converted data types")
+
+    # simplify exterior color
+    web_df['EXT_COLOR'] = web_df.apply(lambda row: ext_color(row), axis=1)
+    logger.info("Exterior color field normalized")
+ 
+    # simplify vehicle title
+    web_df['TITLE'] = web_df.apply(lambda row: vehicle_title(row), axis=1)
+    logger.info("Vehicle title field normalized")
+
+    # simplify number of cylinders
+    web_df['CYL'] = web_df.apply(lambda row: num_cyl(row), axis=1)
+    logger.info("Number of cylinders field normalized")
+
+    # simplify trim level
+    web_df['TRIM'] = web_df.apply(lambda row: trim_level(row), axis=1)    
+    logger.info("Trim level field normalized")
+
+    # create a connection to write df to database
+    engine = create_engine('postgresql://postgres:apassword@localhost:5432/postgres')
+    web_df.to_sql(name='ebay_web', con=engine, if_exists = 'replace', chunksize=2500, index=False)    
+    logger.info("Data loaded into database")
+
 
 if __name__ == "__main__":
     cli()
-                                                     
