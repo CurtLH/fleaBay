@@ -73,6 +73,8 @@ def cli():
     df.drop(df[df['itemid'] == 192121219541].index, inplace=True)
     df.drop(df[df['itemid'] == 222418277892].index, inplace=True)
     df.drop(df[df.endtime.dt.year <= 2016].index, inplace=True)
+    df.drop(df[df.endtime.dt.month <= 3].index, inplace=True)
+    logger.info("Number of records after dropping problems: {}".format(len(df)))
 
     # create a connection to write df to database
     engine = create_engine('postgresql://postgres:apassword@localhost:5432/postgres')
