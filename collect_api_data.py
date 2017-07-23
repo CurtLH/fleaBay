@@ -64,37 +64,6 @@ def collect_api_data(cur):
     logger.info("Number of new records inserted: {}".format(cnt))
 
 
-def scrape_item_attr(cur, items):
-
-    """
-    iterate through the URLS, and write HTML to database
-    """
-
-    cnt = 0
-
-    for line in items:
-        response = urllib2.urlopen(line[1])
-        data = {'scrape_date' : datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                'code' : response.code,
-                'url'  : response.url,
-                'read' : response.read(),
-                'itemId' : int(line[0])}
-    
-        try:
-            cur.execute("INSERT INTO ebay_web_raw (itemid, ad) VALUES (%s, %s)", [data['itemId'], json.dumps(data)])
-            logger.info("Inserted new record: {}".format(line[0]))
-            cnt += 1
-
-        except:
-            logger.info("Failed to insert new record: {}".format(line[0]))
-            pass
-
-        sleep(random() * 5.0)
-
-    logger.info("Number of new records inserted: {}".format(cnt))
-
-
-##### MAIN PROGRAM #####
 @click.command()
 def cli():
 
@@ -127,24 +96,6 @@ def cli():
     logger.info("Starting collecting API data")
     collect_api_data(cur)
     logger.info("Completed collecting API data")
-
-    # create a table for the web scapped data if it doesn't exists
-    cur.execute("""CREATE TABLE IF NOT EXISTS ebay_web_raw
-                   (id SERIAL PRIMARY KEY NOT NULL,
-                    itemId bigint UNIQUE NOT NULL,
-                    ad JSONB)""")
-
-    # get a list of URLS to scrape
-    cur.execute("""SELECT ad -> 'itemId', ad -> 'viewItemURL' 
-                   FROM ebay_api_raw
-                   WHERE itemId NOT IN (SELECT itemId FROM ebay_web_raw)""")
-    items = [line for line in cur]
-    logger.info("Number of ads to scrape for item details: {}".format(len(items)))
-
-    # scrape website ads and store results into the databse
-    logger.info("Starting collecting web data")    
-    scrape_item_attr(cur, items) 
-    logger.info("Completed collecting web data")
 
 if __name__ == "__main__":
     cli()
