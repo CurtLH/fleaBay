@@ -50,24 +50,21 @@ def cli():
                                     'sellingstatus_sellingstate' : 'status'})
 
     # get item attribute info from the database
-    item_df = pd.read_sql('ebay_item_attr', con=engine)
+    web_df = pd.read_sql('ebay_web', con=engine)
 
     # reduce df to variables of interest
-    item_df = item_df[['itemId', 
-                       'Mileage', 
-                       'Year', 
-                       'CYL', 
-                       'TITLE', 
-                       'TRANS', 
-                       'TRIM', 
-                       'EXT_COLOR']]
+    web_df = web_df[['itemId', 'Mileage', 'Year', 'CYL', 'TITLE', 'TRANS', 'TRIM', 'EXT_COLOR']]
 
     # reduce df to the years of interests
-    item_df = item_df[item_df['Year'] >= 2010]
-    logger.info("Number of Camaros between 2010 and 2017: {}".format(len(item_df)))
+    web_df = web_df[web_df['Year'] >= 2010]
+    logger.info("Number of Camaros between 2010 and 2017: {}".format(len(web_df)))
 
     # convert column names to lowercase
-    item_df.columns = [x.lower() for x in item_df.columns]
+    web_df.columns = [x.lower() for x in web_df.columns]
+
+    # merge api data and web data
+    df = pd.merge(web_df, api_df, how='inner', on='itemid')
+    logger.info("Number of records in merged dataset: {}".format(len(df)))
 
     # for some reason, ads before Jan 18 were all sold ads
     df.drop(df[df['endtime'] < '2017-01-18'].index, inplace=True)
