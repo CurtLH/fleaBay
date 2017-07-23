@@ -15,6 +15,7 @@ import urllib2
 from time import sleep
 from random import random
 
+
 # enable logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(module)s - %(funcName)s: %(message)s',
@@ -23,105 +24,190 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def flatten(d, parent_key='', sep='_'):
+def convert_data_types(df):
 
     """
-    Thanks to Stackoverflow #6027558
+    convert data types where appropriate
     """
 
-    items = []
-    for k, v in d.items():
-        new_key = parent_key + sep + k if parent_key else k
-        if isinstance(v, collections.MutableMapping):
-            items.extend(flatten(v, new_key, sep=sep).items())
-        else:
-            items.append((new_key, v))
-
-    return dict(items)
-
-
-def convert_api_dict(api_data):
-
-
-    """
-    convert nested dict to unnested dict
-    """
-
-    # flatten nested dicts
-    api_data_flat = []
-    for line in api_data:
-        flat = flatten(line)
-        api_data_flat.append(flat)
-
-    # find out which columns store data in a list rather than a str
-    list_cols = set()
-    for line in api_data_flat:
-        for key in line:
-            if type(line[key]) == list:
-                list_cols.add(key)
-
-    # look through each dict and expand values that are stored as a list, and convert unicode to str
-    data = []
-    for line in api_data_flat:
-
-        row = {}
-        for key in line:
-            if key == 'title':
-                row[key] = line[key].encode('utf-8')
-
-            elif key in list_cols and type(line[key]) == unicode:
-                new_key = str(key) + "_" + str(line[key])
-                new_value = 'true'
-                row[new_key] = new_value
-
-            elif key in list_cols and type(line[key]) == list:
-                for item in line[key]:
-                    new_key = str(key) + "_" + str(item)
-                    new_value = 'true'
-                    row[new_key] = new_value
-
-            elif type(line[key]) == unicode:
-                new_key = str(key)
-                new_value = str(line[key])
-                row[new_key] = new_value
-
-        data.append(row)
-
-    return data
-
-
-def clean_up_api_df(df):
-
-    """
-    convert value types where appropriate
-    """
-
-    # convert itemId to numberic
+    df['Year'] = pd.to_numeric(df['Year'])
     df['itemId'] = pd.to_numeric(df['itemId'])
-
-    # convert 'true'/'false' to bool
-    df = df.replace('true', True)
-    df = df.replace('false', False)
-
-    # convert datetime values to datetime
-    for col in df.columns:
-        if col.endswith("startTime") or col.endswith("endTime"):
-            df[col] = pd.to_datetime(df[col])
-
-    # in columns where the only value is True, fill in missing values as False
-    for col in df.columns:
-        uniq_vals = df[col].unique().tolist()
-
-        if uniq_vals == [np.nan, True] or uniq_vals == [True, np.nan]:
-            df[col] = df[col].fillna(False)
-
-        if uniq_vals == [np.nan, False] or uniq_vals == [False, np.nan]:
-            df[col] = df[col].fillna(True)
+    df['Mileage'] = pd.to_numeric(df['Mileage'].str.replace(',', ''), errors='coerce')
+    df['Trim'] = df['Trim'].replace(np.nan, "N/A")
+    df['SubModel'] = df['SubModel'].replace(np.nan, "N/A")
 
     return df
 
+def trans_type(row):
 
-##### MAIN PROGRAM #####
+    """
+    simplify transmission type
+    """
+    
+    if type(row['Transmission']) == float:
+        return 'other'
+    
+    if 'auto' in row['Transmission'].lower():
+        return 'automatic'
+    
+    if 'man' in row['Transmission'].lower():
+        return 'manual'
+    
+    else:
+        return 'other'
+    
+df['TRANS'] = df.apply(lambda row: trans_type(row), axis=1)
+
+
+def ext_color(row):
+
+    """
+    simplify exterior color
+    """
+    
+    if type(row['ExteriorColor']) == float:
+        return 'other'
+    else:
+        return row['ExteriorColor'].lower().replace(' ', '_')
+
+df['EXT_COLOR'] = df.apply(lambda row: ext_color(row), axis=1)
+
+
+def vehicle_title(row):
+   
+    """
+    simplify vehicle title
+    """
+ 
+    if type(row['VehicleTitle']) == float:
+        return 'other'
+    
+    if 'Clear' in row['VehicleTitle']:
+        return 'clear'
+    
+    if 'Salvage' in row['VehicleTitle']:
+        return 'salvage'
+    
+    if 'Rebuilt' in row['VehicleTitle']:
+        return 'rebuilt'
+    
+    if 'Flood' in row['VehicleTitle']:
+        return 'flood'
+    
+    else:
+        'other'
+    
+df['TITLE'] = df.apply(lambda row: vehicle_title(row), axis=1)
+
+def vehicle_title(row):
+
+    """
+    simplify number of cylinders
+    """
+
+    
+    if type(row['NumberofCylinders']) == float:
+        return np.NAN
+    
+    if '4' in row['NumberofCylinders']:
+        return '4'
+    
+    if '6' in row['NumberofCylinders']:
+        return '6'
+    
+    if '8' in row['NumberofCylinders']:
+        return '8'
+    
+df['CYL'] = df.apply(lambda row: vehicle_title(row), axis=1)
+
+
+# create an dict with all models and their rank
+models = {'Other': 0,
+          'LE'   : 1,
+          'LT'   : 2,
+          'LS'   : 3,
+          'RS'   : 4,
+          'SS'   : 5,
+          'ZL1'  : 6,
+          'Zl1'  : 6,
+          'zl1'  : 6,
+          'ZL-1' : 6,
+          'zl-1' : 6,
+          'Z/28' : 7,
+          'Z28'  : 7,
+          'COPO' : 8,
+          'Copo' : 8,
+          'copo' : 8}
+
+labels = {0 : 'Other',
+          1 : 'LE',
+          2 : 'LT',
+          3 : 'LS',
+          4 : 'RS',
+          5 : 'SS',
+          6 : 'ZL1',
+          7 : 'Z/28',
+          8 : 'COPO'}
+
+
+def trim_level(row):
+
+    """
+    look for each key in the models dict, and if found, 
+    return the value for that key for the column 'TRIM'
+    """    
+
+    # create an dict with all models and their rank
+    models = {'Other': 0,
+              'LE'   : 1,
+              'LT'   : 2,
+              'LS'   : 3,
+              'RS'   : 4,
+              'SS'   : 5,
+              'ZL1'  : 6,
+              'Zl1'  : 6,
+              'zl1'  : 6,
+              'ZL-1' : 6,
+              'zl-1' : 6,
+              'Z/28' : 7,
+              'Z28'  : 7,
+              'COPO' : 8,
+              'Copo' : 8,
+              'copo' : 8}
+
+    labels = {0 : 'Other',
+              1 : 'LE',
+              2 : 'LT',
+              3 : 'LS',
+              4 : 'RS',
+              5 : 'SS',
+              6 : 'ZL1',
+              7 : 'Z/28',
+              8 : 'COPO'}
+
+    # create an empty baseline
+    models_iden = [0, ]
+    
+    # see if each model is in the the post
+    for key in models.keys():
+        
+        # if it is, append the rank number for that model
+        if key in row['Trim']:
+            models_iden.append(models[key])
+            
+        if key in row['SubModel']:
+            models_iden.append(models[key])
+            
+    # select the highest ranking model and return the label for that model
+    max_model = max(models_iden)
+    
+    return labels[max_model]
+
+df['TRIM'] = df.apply(lambda row: trim_level(row), axis=1)
+
+
+
+
 @click.command()
 def cli():
 
@@ -143,28 +229,6 @@ def cli():
     except:
         logger.info("Unable to connect to the database")
 
-
-    # get all data from the eBay API
-    cur.execute("""SELECT ad FROM ebay_api_raw""")
-    api_data = [record[0] for record in cur]
-    logger.info("Number of records from API: {}".format(len(api_data)))
-
-    # convert nested dict to unnested dict
-    data = convert_api_dict(api_data)
-    logger.info("Nested dict converted to unnested dict")
-
-    # load data into df
-    api_df = pd.DataFrame(data)
-    logger.info("Data loaded into dataframe")
-
-    # normalize the api data
-    api_df = clean_up_api_df(api_df)
-    logger.info("Data normalized")
-
-    # create a connection to write df to database
-    engine = create_engine('postgresql://postgres:apassword@localhost:5432/postgres')
-    api_df.to_sql(name='ebay_api', con=engine, if_exists = 'replace', chunksize=2500, index=False)    
-    logger.info("Data loaded into database")
 
 
 if __name__ == "__main__":
