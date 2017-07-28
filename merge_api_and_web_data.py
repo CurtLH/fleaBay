@@ -66,21 +66,12 @@ def cli():
     df = pd.merge(web_df, api_df, how='inner', on='itemid')
     logger.info("Number of records in merged dataset: {}".format(len(df)))
 
-    # for some reason, ads before Jan 18 were all sold ads
-    df.drop(df[df['endtime'] < '2017-01-18'].index, inplace=True)
-    df.drop(df[df['itemid'] == 122319430122].index, inplace=True)
-    df.drop(df[df['itemid'] == 322439374219].index, inplace=True)
-    df.drop(df[df['itemid'] == 192121219541].index, inplace=True)
-    df.drop(df[df['itemid'] == 222418277892].index, inplace=True)
-    df.drop(df[df.endtime.dt.year <= 2016].index, inplace=True)
-    df.drop(df[df.endtime.dt.month <= 3].index, inplace=True)
-    logger.info("Number of records after dropping problems: {}".format(len(df)))
-
-    # create a connection to write df to database
+   # create a connection to write df to database
     engine = create_engine('postgresql://postgres:apassword@localhost:5432/postgres')
 
     # load the dataframe into the database
     df.to_sql(name='ebay_merged', con=engine, if_exists = 'replace', chunksize=2500, index=False)
+    logger.info("Merged data written to database")
 
 if __name__ == "__main__":
     cli()
