@@ -29,13 +29,20 @@ def scrape_item_attr(cur, items):
     cnt = 0
 
     for line in items:
-        response = urllib2.urlopen(line[1])
-        data = {'scrape_date' : datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                'code' : response.code,
-                'url'  : response.url,
-                'read' : response.read(),
-                'itemId' : int(line[0])}
-    
+
+        try:
+            response = urllib2.urlopen(line[1])
+            data = {'scrape_date' : datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    'code' : response.code,
+                    'url'  : response.url,
+                    'read' : response.read(),
+                    'itemId' : int(line[0])}
+
+        except:
+            logger.info("Could not retreive {}".format(line[1]))
+            pass
+
+        
         try:
             cur.execute("INSERT INTO ebay_web_raw (itemid, ad) VALUES (%s, %s)", [data['itemId'], json.dumps(data)])
             logger.info("Inserted new record: {}".format(line[0]))
