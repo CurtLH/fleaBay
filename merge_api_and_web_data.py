@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import logging
 import psycopg2
 from sqlalchemy import create_engine
