@@ -270,7 +270,3 @@ def cli():
     engine = create_engine('postgresql://postgres:apassword@localhost:5432/postgres')
     web_df.to_sql(name='ebay_web', con=engine, if_exists = 'replace', chunksize=2500, index=False)    
     logger.info("Data loaded into database")
-
-
-if __name__ == "__main__":
-    cli()

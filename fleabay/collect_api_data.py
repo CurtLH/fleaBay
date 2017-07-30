@@ -96,6 +96,3 @@ def cli():
     logger.info("Starting collecting API data")
     collect_api_data(cur)
     logger.info("Completed collecting API data")
-
-if __name__ == "__main__":
-    cli()
