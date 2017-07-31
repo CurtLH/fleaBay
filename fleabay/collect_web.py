@@ -87,4 +87,4 @@ def cli():
     # scrape website ads and store results into the databse
     logger.info("Starting collecting web data")    
     scrape_item_attr(cur, items) 
-    logger.info("Completed collecting web data")`
+    logger.info("Completed collecting web data")
