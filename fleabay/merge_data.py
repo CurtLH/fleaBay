@@ -30,7 +30,8 @@ def cli():
 
     # get API data from the database
     api_df = pd.read_sql('ebay_api', con=engine)
-
+    logger.info("Number of records in API databse: {}".format(len(api_df)))
+  
     # zap column names into lowercase
     api_df.columns = [col.lower() for col in api_df.columns]
 
@@ -49,13 +50,10 @@ def cli():
 
     # get item attribute info from the database
     web_df = pd.read_sql('ebay_web', con=engine)
-
+    logger.info("Number of records in web database: {}".format(len(web_df)))
+    
     # reduce df to variables of interest
     web_df = web_df[['itemId', 'Mileage', 'Year', 'CYL', 'TITLE', 'TRANS', 'TRIM', 'EXT_COLOR']]
-
-    # reduce df to the years of interests
-    web_df = web_df[web_df['Year'] >= 2010]
-    logger.info("Number of Camaros between 2010 and 2017: {}".format(len(web_df)))
 
     # convert column names to lowercase
     web_df.columns = [x.lower() for x in web_df.columns]
