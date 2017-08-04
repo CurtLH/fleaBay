@@ -95,6 +95,3 @@ def cli():
     logger.info("Starting collecting web data")    
     scrape_item_attr(cur, items) 
     logger.info("Completed collecting web data")
-
-if __name__ == "__main__":
-    cli()
