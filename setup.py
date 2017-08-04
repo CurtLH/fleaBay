@@ -14,7 +14,7 @@ setup(
     packages=['fleabay'],
     entry_points={
         'console_scripts': [
-            'fleabay=fleabay.cli:collect'
+            'fleabay=fleabay.cli:cli'
         ]
     },
     install_requires=requirements,
