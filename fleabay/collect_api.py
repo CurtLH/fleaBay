@@ -32,7 +32,7 @@ def collect_api_data(cur):
     while True:
 
         try:
-            api = Finding(domain='svcs.ebay.com', config_file='ebay.yaml')
+            api = Finding(domain='svcs.ebay.com', config_file='/home/curtis/etc/ebay.yaml')
             r = api.execute('findCompletedItems', {'categoryId': '6161', 'paginationInput': {'pageNumber': page_num}})
             response = r.dict()
         
