@@ -17,6 +17,7 @@ Install the latest version of fleaBay using Conda
 ```
 $ conda install fleabay
 ```
+
 ----
 Usage
 ----
