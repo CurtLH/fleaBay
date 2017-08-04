@@ -164,4 +164,4 @@ def cli():
     # create a connection to write df to database
     engine = create_engine('postgresql://postgres:apassword@localhost:5432/postgres')
     api_df.to_sql(name='ebay_api', con=engine, if_exists = 'replace', chunksize=2500, index=False)    
-    logger.info("Data loaded into database') 
+    logger.info("Data loaded into database") 
