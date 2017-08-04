@@ -14,14 +14,14 @@ Install
 
 Install the latest version of fleaBay using Conda
 
-```
+.. code:: bash
 $ conda install fleabay
-```
+
 
 ----
 Usage
 ----
 
-```
+.. code:: bash
 $ fleabay --help
-```
+
