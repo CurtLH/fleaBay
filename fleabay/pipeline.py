@@ -2,6 +2,11 @@
 
 import logging
 import click
+from fleabay import collect_api
+from fleabay import collect_web
+from fleabay import etl_api
+from fleabay import etl_web
+from fleabay import merge_data
 
 # enable logging
 logging.basicConfig(level=logging.INFO,
@@ -15,7 +20,7 @@ logger.setLevel(logging.INFO)
 def cli():
 
     """
-    Collect data from API and Web Scrapper
+    Pipeline to run data collection, ETL process, and merge data
     """
 
     # collect the API data
