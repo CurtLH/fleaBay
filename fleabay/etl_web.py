@@ -162,31 +162,25 @@ def trim_level(row):
 
     # create an dict with all models and their rank
     models = {'Other': 0,
-              'LE'   : 1,
-              'LT'   : 2,
-              'LS'   : 3,
-              'RS'   : 4,
-              'SS'   : 5,
-              'ZL1'  : 6,
-              'Zl1'  : 6,
+              'ls'   : 1,
+              'lt'   : 2,
+              '1lt'  : 2,
+              '2lt'  : 3,
+              'ss'   : 4,
+              '1ss'  : 4,
+              '2ss'  : 5,
               'zl1'  : 6,
-              'ZL-1' : 6,
-              'zl-1' : 6,
-              'Z/28' : 7,
-              'Z28'  : 7,
-              'COPO' : 8,
-              'Copo' : 8,
-              'copo' : 8}
+              'zl-1' : 6
+             }
 
     labels = {0 : 'Other',
-              1 : 'LE',
-              2 : 'LT',
-              3 : 'LS',
-              4 : 'RS',
-              5 : 'SS',
+              1 : 'LS',
+              2 : '1LT',
+              3 : '2LT',
+              4 : '1SS',
+              5 : '2SS',
               6 : 'ZL1',
-              7 : 'Z/28',
-              8 : 'COPO'}
+             }
 
     # create an empty baseline
     models_iden = [0, ]
@@ -195,10 +189,10 @@ def trim_level(row):
     for key in models.keys():
         
         # if it is, append the rank number for that model
-        if key in row['Trim']:
+        if key in row['Trim'].lower():
             models_iden.append(models[key])
             
-        if key in row['SubModel']:
+        if key in row['SubModel'].lower():
             models_iden.append(models[key])
             
     # select the highest ranking model and return the label for that model
