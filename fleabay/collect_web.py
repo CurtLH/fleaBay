@@ -11,6 +11,8 @@ from datetime import datetime
 import urllib2
 from time import sleep
 from random import random
+from email_functions import send_email
+
 
 # enable logging
 logging.basicConfig(level=logging.INFO,
@@ -26,6 +28,12 @@ def scrape_item_attr(cur, items):
     iterate through the URLS, and write HTML to database
     """
 
+
+    # load gmail config
+    with open('/home/curtis/etc/gmail') as f:
+        gmail = json.load(f)
+
+    # set starting values for counters
     cnt = 0
 
     for line in items:
@@ -55,6 +63,14 @@ def scrape_item_attr(cur, items):
         sleep(random() * 5.0)
 
     logger.info("Number of new records inserted: {}".format(cnt))
+    
+    # send email
+    user = gmail['gmail_user']
+    pwd = gmail['gmail_pwd']
+    recipient = 'CurtisLHampton@gmail.com'
+    subject = '{} new records from the eBay web'.format(cnt)
+    body = ''
+    send_email(user, pwd, recipient, subject, body)
 
 
 def start_collect_web():
