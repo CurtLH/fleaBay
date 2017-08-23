@@ -13,8 +13,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-@click.command()
-def cli():
+def start_merge_data():
 
     """
     Load API data and web data and merge into one dataset
@@ -69,5 +68,13 @@ def cli():
     df.to_sql(name='ebay_merged', con=engine, if_exists = 'replace', chunksize=2500, index=False)
     logger.info("Merged data written to database")
 
-if __name__ == "__main__":
-    cli()
+
+
+@click.command()
+def cli():
+
+    """
+    Load API data and web data and merge into one dataset
+    """
+
+    start_merge_data()

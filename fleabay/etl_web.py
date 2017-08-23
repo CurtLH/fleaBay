@@ -207,8 +207,7 @@ def trim_level(row):
     return labels[max_model]
 
 
-@click.command()
-def cli():
+def start_etl_web():
 
     """
     Load raw data from the source database, clean data, load into target database
@@ -270,3 +269,13 @@ def cli():
     engine = create_engine('postgresql://postgres:apassword@localhost:5432/postgres')
     web_df.to_sql(name='ebay_web', con=engine, if_exists = 'replace', chunksize=2500, index=False)    
     logger.info("Data loaded into database")
+
+
+@click.command()
+def cli():
+
+    """
+    Load raw data from the source database, clean data, load into target database
+    """
+
+    start_etl_web()

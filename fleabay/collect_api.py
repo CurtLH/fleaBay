@@ -64,8 +64,7 @@ def collect_api_data(cur):
     logger.info("Number of new records inserted: {}".format(cnt))
 
 
-@click.command()
-def cli():
+def start_collect_api():
 
     """
     Collect data from API and Web Scrapper
@@ -96,3 +95,13 @@ def cli():
     logger.info("Starting collecting API data")
     collect_api_data(cur)
     logger.info("Completed collecting API data")
+
+
+@click.command()
+def cli():
+
+    """
+    Collect data from API and Web Scrapper
+    """
+
+    start_collect_api()
