@@ -57,8 +57,7 @@ def scrape_item_attr(cur, items):
     logger.info("Number of new records inserted: {}".format(cnt))
 
 
-@click.command()
-def cli():
+def start_collect_web():
 
     """
     Collect data from API and Web Scrapper
@@ -95,3 +94,13 @@ def cli():
     logger.info("Starting collecting web data")    
     scrape_item_attr(cur, items) 
     logger.info("Completed collecting web data")
+
+
+@click.command()
+def cli():
+
+    """
+    Collect data from API and Web Scrapper
+    """
+
+    start_collect_web()

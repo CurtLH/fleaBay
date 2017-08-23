@@ -8,6 +8,7 @@ from fleabay import etl_api
 from fleabay import etl_web
 from fleabay import merge_data
 
+
 # enable logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(module)s - %(funcName)s: %(message)s',
@@ -20,25 +21,25 @@ logger.setLevel(logging.INFO)
 def cli():
 
     """
-    Pipeline to run data collection, ETL process, and merge data
+    Collect data, run ETL process, and merge data
     """
 
-    # collect the API data
-    collect_api.cli()
+    # collect API data
+    collect_api.start_collect_api()
     logger.info("API data collection completed")
 
-    # collect the web data
-    collect_web.clii()
+    # collect web data
+    collect_web.start_collect_web()
     logger.info("Web data collection completed")
 
-    # etl the API data
-    etl_api.cli()
-    logger.info("API ETL completed")
+    # etl API data
+    etl_api.start_etl_api()
+    logger.info("API data ETL completed")
 
-    # etl the web data
-    etl_web.cli()
-    logger.info("Web ETL completed")
+    # etl web data
+    etl_web.start_etl_web()
+    logger.info("Web data ETL completed")
 
-    # merge the API data and web data
-    merge_data.cli()
-    logger.info("API and web data merge completed")
+    # merge API data and web data
+    merge_data.start_merge_data()
+    logger.info("API data and wbe data merge completed")

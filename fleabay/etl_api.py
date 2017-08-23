@@ -121,9 +121,7 @@ def clean_up_api_df(df):
     return df
 
 
-##### MAIN PROGRAM #####
-@click.command()
-def cli():
+def start_etl_api():
 
     """
     Load raw data from the source database, clean data, load into target database
@@ -165,3 +163,12 @@ def cli():
     engine = create_engine('postgresql://postgres:apassword@localhost:5432/postgres')
     api_df.to_sql(name='ebay_api', con=engine, if_exists = 'replace', chunksize=2500, index=False)    
     logger.info("Data loaded into database") 
+
+@click.command()
+def cli():
+
+    """
+    Load raw data from the source database, clean data, load into target database
+    """
+
+    start_etl_api()
