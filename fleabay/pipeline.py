@@ -17,8 +17,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-@click.command()
-def cli():
+def start_pipeline():
 
     """
     Collect data, run ETL process, and merge data
@@ -43,3 +42,12 @@ def cli():
     # merge API data and web data
     merge_data.start_merge_data()
     logger.info("API data and wbe data merge completed")
+
+@click.command()
+def cli():
+
+    """
+    Collect data, run ETL process, and merge data
+    """
+
+    start_pipeline()
