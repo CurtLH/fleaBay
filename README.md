@@ -10,12 +10,11 @@ fleaBay is a Python package for collecting data from the eBay API.
 
 Install the latest version of fleaBay using Conda
 
-.. code:: bash
+```bash
 $ conda install fleabay
-
+```
 
 ## Usage
-
-.. code:: bash
+```bash
 $ fleabay --help
-
+```
