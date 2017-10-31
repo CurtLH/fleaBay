@@ -9,3 +9,8 @@ dependencies:
   - pysocks
   - beautifulsoup4
   - psycopg2
+  - pip
+  - pip:
+    - git+https://github.com/timotheus/ebaysdk-python.git
+  - sqlalchemy
+  - pandas
