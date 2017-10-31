@@ -1,0 +1,11 @@
+name: fleabay-dev
+channels:
+  - conda-forge
+dependencies:
+  - python=2.7
+  - pytest
+  - ipython
+  - click
+  - pysocks
+  - beautifulsoup4
+  - psycopg2
