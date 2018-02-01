@@ -1,10 +1,6 @@
 # fleaBay
 
-.. image:: https://img.shields.io/travis/CurtLH/fleabay.svg
-        :target: https://travis-ci.org/CurtLH/fleabay
-
-
-fleaBay is a Python package for collecting data from the eBay API.  
+Conda package for Python that connects to the eBay API and obtains information regarding completed auctions for a given product category. After information is collected via the API access, auction listings are scrapped for additional attribute information (e.g., product description). Also includes an ETL process to  monitor the source database and routinely extract, transform, and load data from the source database into a data warehouse.
 
 ## Install
 
